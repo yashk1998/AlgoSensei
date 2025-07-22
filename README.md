@@ -4,10 +4,6 @@ DSAGPT Tutor is your personal tutor for mastering Data Structures and Algorithms
 
 Built with Next.js and AI technology, this open-source template helps developers create their own programming education tools. As more developers prepare for technical interviews, this template lets you build your own DSA learning platform quickly and easily.
 
-## Live Demo
-
-[https://dsa-tutor-gpt.vercel.app/](https://dsa-tutor-gpt.vercel.app/)
-
 ## Features
 
 - User authentication and registration
@@ -32,7 +28,7 @@ Built with Next.js and AI technology, this open-source template helps developers
 
 ```bash
 git clone https://github.com/yashk1998/dsa-buddy.git
-cd dsa-gpt-tutor
+cd dsa-buddy
 ```
 
 **2. Install dependencies:**
