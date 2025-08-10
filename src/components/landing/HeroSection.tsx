@@ -7,8 +7,14 @@ import { RainbowButton } from "@/components/ui/rainbow-button";
 import { BoxReveal } from "@/components/ui/box-reveal";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { LanguagesOrbit } from "./LanguagesOrbit";
+import dynamic from "next/dynamic";
 import { TypingTopics } from "@/components/ui/typing-topics";
+
+// Defer heavy animated visual to reduce initial dev build cost
+const LanguagesOrbit = dynamic(() => import("./LanguagesOrbit").then(m => m.LanguagesOrbit), {
+  ssr: false,
+  loading: () => <div className="h-[500px] w-full" />
+});
 
 /**
  * @dev Main hero section that introduces the platform

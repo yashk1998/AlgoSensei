@@ -52,6 +52,7 @@ NEXTAUTH_SECRET=your_nextauth_secret
 AZURE_OPENAI_KEY=your_azure_openai_key
 AZURE_OPENAI_ENDPOINT=your_azure_openai_endpoint
 AZURE_OPENAI_DEPLOYMENT=your_azure_openai_deployment
+AZURE_OPENAI_API_VERSION=2024-06-01
 ```
 
 **5. Run the development server:**
@@ -61,6 +62,19 @@ npm run dev
 ```
 
 **6. Open your browser and navigate to `http://localhost:3000`**
+
+## Project Structure
+
+```
+src/
+  app/                # Next.js App Router (routes, API, layouts)
+  components/         # UI components (chat, landing, layout, ui)
+  lib/                # Server utilities (auth, mongodb, helpers)
+  providers/          # Context providers (auth)
+  styles/             # Global and component styles
+  types/              # Type augmentations
+public/               # Static assets
+```
 
 ## Screenshots
 
@@ -88,4 +102,12 @@ We love contributions! Here's how you can help make DSAGPT Tutor even better:
 5. Open a Pull Request
 
 ## Contact
+## Performance & Structure Notes
+
+- Use `pnpm` for faster installs and a smaller lockfile: `pnpm i && pnpm dev`.
+- Dev server uses `next dev --turbo` for improved HMR.
+- Heavy visual components are lazy loaded on the client (`LanguagesOrbit`, `ChatPreview`) to speed up startup.
+- Azure OpenAI SDK runs on the Node runtime (`api/ai`) to avoid bundling into the Edge runtime during dev.
+- Keep only one PostCSS config (`postcss.config.mjs`) to reduce config resolution time.
+- Run `pnpm typecheck` and `pnpm lint` before commits.
 Please open an issue in the GitHub repository for any queries or support.

@@ -11,7 +11,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ArrowUpIcon, Code2, Lightbulb, MessageSquare, Sparkles, Bot, User } from 'lucide-react';
 import { AutoResizeTextarea } from '@/components/ui/auto-resize-textarea';
-import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
+import dynamic from 'next/dynamic';
+
+// Defer Markdown renderer (remark/rehype) until needed to reduce initial bundle size in dev
+const MarkdownRenderer = dynamic(() => import('@/components/ui/markdown-renderer').then(m => m.MarkdownRenderer), {
+  ssr: false,
+});
 
 /**
  * @dev Defines the structure for chat messages

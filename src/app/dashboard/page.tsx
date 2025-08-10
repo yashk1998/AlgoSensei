@@ -5,11 +5,15 @@
 
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import ChatSidebar from '@/components/chat/ChatSidebar';
-import ChatInterface from '@/components/chat/ChatInterface';
+import nextDynamic from 'next/dynamic';
+const ChatSidebar = nextDynamic(() => import('@/components/chat/ChatSidebar'), { ssr: false });
+const ChatInterface = nextDynamic(() => import('@/components/chat/ChatInterface'), { ssr: false });
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 /**

@@ -1,6 +1,4 @@
 import ReactMarkdown from 'react-markdown';
-import rehypeHighlight from 'rehype-highlight';
-import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { Components } from 'react-markdown';
@@ -74,7 +72,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     <ReactMarkdown
       className={cn("markdown prose dark:prose-invert max-w-none", className)}
       remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeRaw, rehypeHighlight]}
+      // Keep it lightweight: no rehype-raw and no syntax highlighter to speed dev compilation
       components={components}
     >
       {processedContent}

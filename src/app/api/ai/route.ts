@@ -7,7 +7,8 @@ import { NextRequest } from 'next/server';
 import { headers } from 'next/headers';
 import { OpenAIClient, AzureKeyCredential } from '@azure/openai';
 
-export const runtime = 'edge';
+// Use Node.js runtime to avoid bundling large SDK into Edge and improve DX
+export const runtime = 'nodejs';
 
 /**
  * @dev System prompt configuring AI behavior for DSA tutoring
@@ -90,17 +91,6 @@ Remember: This is an interactive session. Always wait for user confirmation befo
  */
 export async function POST(req: NextRequest) {
   try {
-    // Debug environment variables (remove after fixing)
-    console.log('Environment check:');
-    console.log('ENDPOINT exists:', !!process.env.AZURE_OPENAI_ENDPOINT);
-    console.log('KEY exists:', !!process.env.AZURE_OPENAI_KEY);
-    console.log('DEPLOYMENT exists:', !!process.env.AZURE_OPENAI_DEPLOYMENT);
-    console.log('API_VERSION exists:', !!process.env.AZURE_OPENAI_API_VERSION);
-    console.log('ENDPOINT value:', process.env.AZURE_OPENAI_ENDPOINT);
-    console.log('DEPLOYMENT value:', process.env.AZURE_OPENAI_DEPLOYMENT);
-    console.log('API_VERSION value:', process.env.AZURE_OPENAI_API_VERSION);
-    // Don't log the actual key for security
-
     const headersList = headers();
     const cookieHeader = headersList.get('cookie');
     if (!cookieHeader?.includes('next-auth.session-token')) {
@@ -138,8 +128,6 @@ export async function POST(req: NextRequest) {
         role: msg.role === 'user' ? 'user' : 'assistant',
         content: msg.content.trim()
       }));
-
-    console.log('Making API call with deployment:', process.env.AZURE_OPENAI_DEPLOYMENT);
 
     const response = await client.getChatCompletions(
       process.env.AZURE_OPENAI_DEPLOYMENT,

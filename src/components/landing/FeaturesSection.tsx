@@ -6,7 +6,12 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Terminal, Code2, TestTube, Lightbulb, FileCode, Bug } from "lucide-react";
-import { ChatPreview } from "./ChatPreview";
+import dynamic from "next/dynamic";
+
+// Defer screenshot animation to reduce initial bundle during dev
+const ChatPreview = dynamic(() => import("./ChatPreview").then(m => m.ChatPreview), {
+  ssr: false
+});
 
 /**
  * @dev Configuration for problem-solving stages

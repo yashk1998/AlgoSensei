@@ -3,6 +3,8 @@
  * Features: full-height layout, background styling, flexible content area
  */
 
+'use client';
+
 import React from 'react';
 
 /**
