@@ -1,6 +1,6 @@
-# **DSAGPT Tutor**
+# **AlgoSensei**
 
-DSAGPT Tutor is your personal tutor for mastering Data Structures and Algorithms. It provides step-by-step guidance, similar to learning from a human instructor. With features like AI chat and interactive problem-solving, DSAGPT Tutor helps you excel in your coding interviews.
+AlogSensei is your personal tutor for mastering Data Structures and Algorithms. It provides step-by-step guidance, similar to learning from a human instructor. With features like AI chat and interactive problem-solving, AlgoSensei helps you excel in your coding interviews.
 
 Built with Next.js and AI technology, this open-source template helps developers create their own programming education tools. As more developers prepare for technical interviews, this template lets you build your own DSA learning platform quickly and easily.
 
@@ -82,10 +82,10 @@ public/               # Static assets
 ## Screenshots
 
 <div style="float:left; display: flex; flex-wrap: wrap; gap: 10px;">
-  <img src="public/screenshots/dsa-gpt-tutor-landing-page.png" alt="DSAGPT Tutor Landing Page" style="width: 49%; border: 2px solid black;" />
-  <img src="public/screenshots/dsa-gpt-tutor-chat-preview.png" alt="DSAGPT Tutor Chat Preview" style="width: 49%; border: 2px solid black;" />
-  <img src="public/screenshots/dsa-gpt-tutor-new-chat.png" alt="DSAGPT Tutor New Chat" style="width: 49%; border: 2px solid black;" />
-  <img src="public/screenshots/dsa-gpt-tutor-chat-sample.png" alt="DSAGPT Tutor Chat Sample" style="width: 49%; border: 2px solid black;" />
+  <img src="public/screenshots/dsa-gpt-tutor-landing-page.png" alt="AlgoSensei Landing Page" style="width: 49%; border: 2px solid black;" />
+  <img src="public/screenshots/dsa-gpt-tutor-chat-preview.png" alt="AlgoSensei Chat Preview" style="width: 49%; border: 2px solid black;" />
+  <img src="public/screenshots/dsa-gpt-tutor-new-chat.png" alt="AlgoSensei New Chat" style="width: 49%; border: 2px solid black;" />
+  <img src="public/screenshots/dsa-gpt-tutor-chat-sample.png" alt="AlgoSensei Chat Sample" style="width: 49%; border: 2px solid black;" />
 </div>
 
 ## How to use the application
@@ -96,7 +96,7 @@ public/               # Static assets
 
 ## Contributing
 
-We love contributions! Here's how you can help make DSAGPT Tutor even better:
+We love contributions! Here's how you can help make AlgoSensei even better:
 
 1. Fork the project (`gh repo fork https://github.com/yashk1998/dsa-buddy.git`)
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
