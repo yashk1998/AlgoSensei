@@ -9,6 +9,7 @@ export const runtime = 'nodejs';
 import clientPromise from '@/lib/mongodb';
 import { getServerSession } from 'next-auth';
 import { ObjectId } from 'mongodb';
+import { getSessionId } from '@/lib/session';
 
 /**
  * @dev GET handler for retrieving user's chat history
@@ -49,9 +50,11 @@ export async function POST(req: NextRequest) {
     const { title } = await req.json();
     const client = await clientPromise;
     const chats = client.db().collection('chats');
+    const sessionId = getSessionId();
 
     const newChat = {
       userEmail: session.user.email,
+      sessionId: sessionId || null,
       title: title || 'New Discussion',
       messages: [],
       createdAt: new Date(),

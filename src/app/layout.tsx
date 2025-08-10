@@ -18,7 +18,7 @@ const inter = Inter({ subsets: ["latin"] });
  * @dev Global metadata configuration for SEO
  */
 export const metadata: Metadata = {
-  title: "DSAGPT Tutor",
+  title: "AlgoSensei",
   description: "Your AI-powered DSA learning companion",
 };
 

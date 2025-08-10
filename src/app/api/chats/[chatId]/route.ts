@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { getServerSession } from 'next-auth';
 import { ObjectId } from 'mongodb';
+import { getSessionId } from '@/lib/session';
 
 /**
  * @dev GET handler for retrieving specific chat
@@ -58,6 +59,7 @@ export async function PATCH(
     const { title, message } = await req.json();
     const client = await clientPromise;
     const chats = client.db().collection('chats');
+    const sessionId = getSessionId();
 
     const updateData: any = {};
     const updateOperation: any = {
@@ -71,7 +73,11 @@ export async function PATCH(
     }
 
     if (message) {
-      updateOperation.$push = { messages: message };
+      const enrichedMessage = {
+        ...message,
+        sessionId: sessionId || null,
+      };
+      updateOperation.$push = { messages: enrichedMessage };
     }
 
     const result = await chats.findOneAndUpdate(

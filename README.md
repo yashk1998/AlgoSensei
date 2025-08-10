@@ -15,6 +15,7 @@ Built with Next.js and AI technology, this open-source template helps developers
 - Next.js and React for Frontend and Backend
 - Database: MongoDB
 - AI Integration: Azure OpenAI
+- Memory Layer: Mem0 (optional)
 - State Management: React Context
 
 ## Use Cases
@@ -53,6 +54,8 @@ AZURE_OPENAI_KEY=your_azure_openai_key
 AZURE_OPENAI_ENDPOINT=your_azure_openai_endpoint
 AZURE_OPENAI_DEPLOYMENT=your_azure_openai_deployment
 AZURE_OPENAI_API_VERSION=2024-06-01
+MEM0_API_KEY=your_mem0_api_key
+MEM0_BASE_URL=https://api.mem0.ai
 ```
 
 **5. Run the development server:**

@@ -28,7 +28,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-              DSAGPT Tutor
+              AlgoSensei 
             </span>
           </Link>
 

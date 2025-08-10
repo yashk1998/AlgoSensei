@@ -5,7 +5,10 @@
 
 import { NextRequest } from 'next/server';
 import { headers } from 'next/headers';
-import { OpenAIClient, AzureKeyCredential } from '@azure/openai';
+import OpenAI from 'openai';
+import { mem0UpsertMemory, mem0QueryMemories } from '@/lib/mem0';
+import { getServerSession } from 'next-auth';
+import { getSessionId } from '@/lib/session';
 
 // Use Node.js runtime to avoid bundling large SDK into Edge and improve DX
 export const runtime = 'nodejs';
@@ -111,16 +114,20 @@ export async function POST(req: NextRequest) {
       throw new Error('AZURE_OPENAI_API_VERSION is not set');
     }
 
-    // Create client with proper configuration
-    const client = new OpenAIClient(
-      process.env.AZURE_OPENAI_ENDPOINT,
-      new AzureKeyCredential(process.env.AZURE_OPENAI_KEY),
-      {
-        apiVersion: process.env.AZURE_OPENAI_API_VERSION
-      }
-    );
+    // Configure OpenAI SDK for Azure OpenAI
+    const client = new OpenAI({
+      apiKey: process.env.AZURE_OPENAI_KEY,
+      baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}`,
+      defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION },
+      defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_KEY },
+    });
 
     const { messages } = await req.json();
+
+    // Identify user for memory context
+    const session = await getServerSession();
+    const userId = session?.user?.email || session?.user?.id || 'anonymous';
+    const sessionId = getSessionId();
     
     const validMessages = messages
       .filter((msg: any) => msg.content && msg.content.trim() !== '')
@@ -129,28 +136,38 @@ export async function POST(req: NextRequest) {
         content: msg.content.trim()
       }));
 
-    const response = await client.getChatCompletions(
-      process.env.AZURE_OPENAI_DEPLOYMENT,
-      [
+    // Retrieve prior memories to provide context
+    const memories = await mem0QueryMemories(userId);
+
+    const completion = await client.chat.completions.create({
+      model: process.env.AZURE_OPENAI_DEPLOYMENT!,
+      temperature: 0.7,
+      max_tokens: 4096,
+      messages: [
         {
           role: 'system',
-          content: systemPrompt,
+          content: systemPrompt + '\nPrevious context (summarized):\n' + (memories?.map((m: { content: string }) => `- ${m.content}`).join('\n') || ''),
         },
         ...validMessages,
       ],
-      {
-        maxTokens: 4096,
-        temperature: 0.7,
-      }
-    );
+    });
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const content = response.choices[0]?.message?.content || '';
+          const content = completion.choices?.[0]?.message?.content || '';
           controller.enqueue(encoder.encode(content));
           controller.close();
+          // Store assistant reply as memory for future sessions
+          try {
+            await mem0UpsertMemory({
+              userId,
+              sessionId,
+              content,
+              tags: ['assistant-reply']
+            });
+          } catch {}
         } catch (error) {
           controller.error(error);
         }
