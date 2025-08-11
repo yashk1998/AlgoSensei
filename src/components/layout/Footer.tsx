@@ -24,7 +24,7 @@ const Footer = () => {
             </div>
             <div className="flex items-center gap-4">
               <a
-                href="https://github.com/yashk1998/dsa-gpt/fork"
+                href="https://github.com/yashk1998/AlgoSensei/fork"
                 className="bg-black text-white px-3 py-2 md:px-4 md:py-2 rounded-md hover:bg-gray-800 transition-colors text-xs"
               >
                 Fork and Build Your Own
