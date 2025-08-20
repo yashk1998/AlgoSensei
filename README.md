@@ -15,7 +15,7 @@ Built with Next.js and AI technology, this open-source template helps developers
 - Next.js and React for Frontend and Backend
 - Database: MongoDB
 - AI Integration: Azure OpenAI
-- Memory Layer: Mem0 (optional)
+- Memory Layer: Mem0 (WIP)
 - State Management: React Context
 
 ## Use Cases
