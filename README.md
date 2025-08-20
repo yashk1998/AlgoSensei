@@ -28,8 +28,8 @@ Built with Next.js and AI technology, this open-source template helps developers
 **1. Clone the repository:**
 
 ```bash
-git clone https://github.com/yashk1998/dsa-buddy.git
-cd dsa-buddy
+git clone https://github.com/yashk1998/AlgoSensei.git
+cd AlgoSensei
 ```
 
 **2. Install dependencies:**
