@@ -5,7 +5,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Terminal, Code2, TestTube, Lightbulb, FileCode, Bug } from "lucide-react";
+import { Terminal, Code2, TestTube, Lightbulb, FileCode, Bug, Eye, ImagePlus } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // Defer screenshot animation to reduce initial bundle during dev
@@ -21,32 +21,32 @@ const stages = [
   {
     icon: Terminal,
     title: "Problem Understanding",
-    description: "Break down the problem, analyze requirements, and identify constraints.",
+    description: "Break down the problem with Socratic questions and SVG-visualized examples.",
+  },
+  {
+    icon: Eye,
+    title: "Visual Walkthrough",
+    description: "See arrays, trees, graphs, and DP tables come alive with inline SVG diagrams.",
   },
   {
     icon: TestTube,
     title: "Test Case Analysis",
-    description: "Review sample cases, identify edge cases, and validate inputs.",
+    description: "Trace through test cases step-by-step with color-highlighted visualizations.",
   },
   {
     icon: Lightbulb,
-    title: "Logic Building",
-    description: "Brainstorm approaches, recognize patterns, and develop solution strategy.",
+    title: "Pattern Recognition",
+    description: "Discover algorithmic patterns through guided hints — not handed answers.",
   },
   {
     icon: Code2,
-    title: "Algorithm & Pseudo Code",
-    description: "Develop step-by-step algorithm and analyze complexity.",
+    title: "Algorithm & Flowcharts",
+    description: "See algorithm flow with Mermaid diagrams, then write pseudocode and code.",
   },
   {
-    icon: FileCode,
-    title: "Implementation",
-    description: "Write code with guidance, following best practices.",
-  },
-  {
-    icon: Bug,
-    title: "Dry Run & Debug",
-    description: "Test, identify bugs, and optimize performance.",
+    icon: ImagePlus,
+    title: "Upload & Analyze",
+    description: "Upload problem screenshots or whiteboard sketches — the AI analyzes them visually.",
   },
 ];
 
@@ -96,11 +96,11 @@ export function FeaturesSection() {
     <section id="features" className="container mt-8 md:mt-10 px-4">
       <div className="text-center space-y-2 mb-8 md:mb-12">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-          Experience AI-Guided Learning
+          See DSA. Understand DSA.
         </h2>
         <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Our intelligent system breaks down complex problems into manageable steps,
-          making DSA approachable for everyone.
+          Visual-first teaching with SVG diagrams, Mermaid flowcharts, image analysis,
+          and Socratic guidance that adapts to your level.
         </p>
       </div>
 

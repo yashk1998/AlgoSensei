@@ -2,16 +2,43 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { Components } from 'react-markdown';
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, Children, isValidElement } from 'react';
 import { Copy, Check } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { SvgRenderer } from './svg-renderer';
+
+// Lazy-load Mermaid renderer since it pulls in the heavy mermaid library
+const MermaidRenderer = dynamic(
+  () => import('./mermaid-renderer').then(m => ({ default: m.MermaidRenderer })),
+  { ssr: false, loading: () => <div className="animate-pulse rounded-lg border bg-gray-50 p-6 text-center text-sm text-gray-400">Loading diagram...</div> }
+);
 
 interface MarkdownRendererProps {
   content: string;
   className?: string;
 }
 
+/**
+ * Extract the language and text content from a <pre><code> tree.
+ * Returns null when the pre block isn't a fenced code block.
+ */
+function extractCodeBlock(children: React.ReactNode): { language: string; text: string } | null {
+  const child = Children.toArray(children).find(
+    (c) => isValidElement(c) && (c.type === 'code' || (c.props as any)?.className?.includes('language-'))
+  );
+
+  if (!isValidElement(child)) return null;
+
+  const className: string = (child.props as any).className || '';
+  const match = /language-(\w+)/.exec(className);
+  const language = match?.[1] || '';
+  const text = String((child.props as any).children || '').replace(/\n$/, '');
+
+  return { language, text };
+}
+
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
-  const mightContainCode = content.includes('```') || content.includes('`') || 
+  const mightContainCode = content.includes('```') || content.includes('`') ||
                           content.includes('    ') || content.includes('\t');
 
   const processedContent = mightContainCode ? content : content.split('\n').join('  \n');
@@ -20,6 +47,18 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     pre: ({ node, className: preClassName, children, ...props }) => {
       const [copied, setCopied] = useState(false);
       const preRef = useRef<HTMLPreElement>(null);
+
+      const block = extractCodeBlock(children);
+
+      // Render SVG blocks as actual inline SVGs
+      if (block?.language === 'svg') {
+        return <SvgRenderer content={block.text} />;
+      }
+
+      // Render Mermaid blocks as diagrams
+      if (block?.language === 'mermaid') {
+        return <MermaidRenderer chart={block.text} />;
+      }
 
       const copyToClipboard = async () => {
         if (preRef.current) {
@@ -33,7 +72,16 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
 
       return (
         <div className="relative group">
-          <pre ref={preRef} {...props} className={cn("overflow-auto p-4 bg-gray-50 rounded-md", preClassName)}>
+          {block?.language && (
+            <div className="flex items-center justify-between rounded-t-md bg-gray-800 px-4 py-1.5 text-xs text-gray-400">
+              <span>{block.language}</span>
+            </div>
+          )}
+          <pre ref={preRef} {...props} className={cn(
+            "overflow-auto p-4 bg-gray-900 text-gray-100",
+            block?.language ? "rounded-b-md" : "rounded-md",
+            preClassName
+          )}>
             {children}
           </pre>
           <button
@@ -56,8 +104,8 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         <code
           {...props}
           className={cn(
-            isInline 
-              ? "px-1 py-0.5 bg-gray-100 rounded text-sm" 
+            isInline
+              ? "px-1 py-0.5 bg-gray-100 rounded text-sm"
               : "block text-sm",
             codeClassName
           )}
@@ -66,13 +114,12 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         </code>
       );
     }
-  }), []); 
+  }), []);
 
   return (
     <ReactMarkdown
       className={cn("markdown prose dark:prose-invert max-w-none", className)}
       remarkPlugins={[remarkGfm]}
-      // Keep it lightweight: no rehype-raw and no syntax highlighter to speed dev compilation
       components={components}
     >
       {processedContent}

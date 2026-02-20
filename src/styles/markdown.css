@@ -133,3 +133,34 @@
 .markdown p code {
   @apply text-sm bg-gray-100 rounded px-1;
 }
+
+/* SVG visualization styles */
+.svg-visualization {
+  @apply my-4;
+}
+
+.svg-visualization svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Mermaid diagram styles */
+.mermaid-diagram {
+  @apply my-4;
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure diagrams inside chat bubbles don't overflow */
+.markdown .svg-visualization,
+.markdown .mermaid-diagram {
+  @apply -mx-2 my-3;
+}
+
+/* Code block language label */
+.markdown pre .language-label {
+  @apply text-xs text-gray-400 font-mono;
+}
