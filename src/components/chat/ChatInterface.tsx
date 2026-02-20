@@ -107,6 +107,14 @@ function fileToBase64(file: File): Promise<string> {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
+const LOADING_STAGES = [
+  'Understanding your question...',
+  'Thinking about the best approach...',
+  'Building visual explanations...',
+  'Crafting SVG diagrams...',
+  'Almost ready...',
+];
+
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -122,21 +130,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
   const router = useRouter();
   const chatId = searchParams.get('chatId');
 
-  const loadingStages = [
-    'Understanding your question...',
-    'Thinking about the best approach...',
-    'Building visual explanations...',
-    'Crafting SVG diagrams...',
-    'Almost ready...'
-  ];
-
   /* ----- Loading stage rotation ----- */
   useEffect(() => {
     if (isThinking) {
       let currentIndex = 0;
       const interval = setInterval(() => {
-        setLoadingStage(loadingStages[currentIndex]);
-        currentIndex = (currentIndex + 1) % loadingStages.length;
+        setLoadingStage(LOADING_STAGES[currentIndex]);
+        currentIndex = (currentIndex + 1) % LOADING_STAGES.length;
       }, 2000);
       return () => clearInterval(interval);
     }
@@ -154,7 +154,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
       setMessages([]);
       setCurrentChat(null);
     }
-  }, [chatId]);
+  }, [chatId, fetchChat]);
 
   useEffect(() => {
     scrollToBottom();
@@ -180,7 +180,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
 
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
-  }, []);
+  }, [processFiles]);
 
   /* ----- File processing ----- */
   const processFiles = useCallback(async (files: File[] | FileList) => {
@@ -220,10 +220,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
   }, [processFiles]);
 
   /* ----- Chat fetching ----- */
-  const fetchChat = async (chatId: string) => {
+  const fetchChat = useCallback(async (id: string) => {
     setIsFetchingChat(true);
     try {
-      const response = await fetch(`/api/chats/${chatId}`, { cache: 'no-store' });
+      const response = await fetch(`/api/chats/${id}`, { cache: 'no-store' });
       if (response.ok) {
         const chat = await response.json();
         setCurrentChat(chat);
@@ -236,7 +236,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
     } finally {
       setIsFetchingChat(false);
     }
-  };
+  }, [router]);
 
   const createNewChat = async () => {
     try {
@@ -634,6 +634,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
                           {images.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-2">
                               {images.map((src, idx) => (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   key={idx}
                                   src={src}
@@ -682,6 +683,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
             <div className="flex gap-2 mb-2 px-1">
               {imageAttachments.map((img) => (
                 <div key={img.id} className="relative group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img.base64}
                     alt={img.name}

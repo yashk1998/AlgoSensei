@@ -37,6 +37,64 @@ function extractCodeBlock(children: React.ReactNode): { language: string; text: 
   return { language, text };
 }
 
+/**
+ * Proper React component for <pre> blocks so hooks satisfy rules-of-hooks.
+ */
+function CodeBlockPre({ className: preClassName, children, ...props }: any) {
+  const [copied, setCopied] = useState(false);
+  const preRef = useRef<HTMLPreElement>(null);
+
+  const block = extractCodeBlock(children);
+
+  // Render SVG blocks as actual inline SVGs
+  if (block?.language === 'svg') {
+    return <SvgRenderer content={block.text} />;
+  }
+
+  // Render Mermaid blocks as diagrams
+  if (block?.language === 'mermaid') {
+    return <MermaidRenderer chart={block.text} />;
+  }
+
+  const copyToClipboard = async () => {
+    if (preRef.current) {
+      const codeElement = preRef.current.querySelector('code');
+      const textContent = codeElement?.textContent || '';
+      await navigator.clipboard.writeText(textContent);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="relative group">
+      {block?.language && (
+        <div className="flex items-center justify-between rounded-t-md bg-gray-800 px-4 py-1.5 text-xs text-gray-400">
+          <span>{block.language}</span>
+        </div>
+      )}
+      <pre ref={preRef} {...props} className={cn(
+        "overflow-auto p-4 bg-gray-900 text-gray-100",
+        block?.language ? "rounded-b-md" : "rounded-md",
+        preClassName
+      )}>
+        {children}
+      </pre>
+      <button
+        onClick={copyToClipboard}
+        className="absolute top-2 right-2 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded opacity-0 group-hover:opacity-100 transition-all"
+        aria-label="Copy code"
+      >
+        {copied ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <Copy className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+}
+
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
   const mightContainCode = content.includes('```') || content.includes('`') ||
                           content.includes('    ') || content.includes('\t');
@@ -44,60 +102,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
   const processedContent = mightContainCode ? content : content.split('\n').join('  \n');
 
   const components: Components = useMemo(() => ({
-    pre: ({ node, className: preClassName, children, ...props }) => {
-      const [copied, setCopied] = useState(false);
-      const preRef = useRef<HTMLPreElement>(null);
-
-      const block = extractCodeBlock(children);
-
-      // Render SVG blocks as actual inline SVGs
-      if (block?.language === 'svg') {
-        return <SvgRenderer content={block.text} />;
-      }
-
-      // Render Mermaid blocks as diagrams
-      if (block?.language === 'mermaid') {
-        return <MermaidRenderer chart={block.text} />;
-      }
-
-      const copyToClipboard = async () => {
-        if (preRef.current) {
-          const codeElement = preRef.current.querySelector('code');
-          const textContent = codeElement?.textContent || '';
-          await navigator.clipboard.writeText(textContent);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }
-      };
-
-      return (
-        <div className="relative group">
-          {block?.language && (
-            <div className="flex items-center justify-between rounded-t-md bg-gray-800 px-4 py-1.5 text-xs text-gray-400">
-              <span>{block.language}</span>
-            </div>
-          )}
-          <pre ref={preRef} {...props} className={cn(
-            "overflow-auto p-4 bg-gray-900 text-gray-100",
-            block?.language ? "rounded-b-md" : "rounded-md",
-            preClassName
-          )}>
-            {children}
-          </pre>
-          <button
-            onClick={copyToClipboard}
-            className="absolute top-2 right-2 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded opacity-0 group-hover:opacity-100 transition-all"
-            aria-label="Copy code"
-          >
-            {copied ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-      );
-    },
+    pre: CodeBlockPre,
     code: ({ node, className: codeClassName, children, ...props }) => {
       const isInline = !codeClassName && typeof children === 'string';
       return (

@@ -137,7 +137,7 @@ export function TestimonialsSection() {
                       </div>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      "{testimonial.content}"
+                      &ldquo;{testimonial.content}&rdquo;
                     </p>
                   </CardContent>
                 </Card>

@@ -116,6 +116,7 @@ export function ImageUpload({ attachments, onAttach, onRemove, disabled }: Image
         <div className="flex gap-2 px-3 pb-2">
           {attachments.map((img) => (
             <div key={img.id} className="relative group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.base64}
                 alt={img.name}
