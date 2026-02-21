@@ -1,12 +1,23 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import { User } from "next-auth";
-import { JWT } from "next-auth/jwt";
+import { encodeEmail, downloadJson } from "@/lib/azure-storage";
 
 interface CustomUser extends User {
   username: string;
+  name?: string;
+  image?: string;
+  bio?: string;
+  preferredLanguages?: string[];
+}
+
+interface StoredUser {
+  _id: string;
+  username: string;
+  email: string;
+  password: string;
+  createdAt: string;
   name?: string;
   image?: string;
   bio?: string;
@@ -27,10 +38,9 @@ const handler = NextAuth({
           throw new Error('Invalid credentials');
         }
 
-        const client = await clientPromise;
-        const users = client.db().collection('users');
-        
-        const user = await users.findOne({ email: credentials.email });
+        const user = await downloadJson<StoredUser>(
+          `users/${encodeEmail(credentials.email)}.json`
+        );
 
         if (!user) {
           throw new Error('No user found');
@@ -46,7 +56,7 @@ const handler = NextAuth({
         }
 
         return {
-          id: user._id.toString(),
+          id: user._id,
           email: user.email,
           username: user.username,
           name: user.name || '',
@@ -67,11 +77,9 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        // Save user data in token when signing in
         token.user = user as CustomUser;
       }
-      
-      // Handle session update
+
       if (trigger === "update" && session?.user) {
         token.user = {
           ...(token.user as CustomUser),
@@ -81,7 +89,6 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // Add user data from token to session
       if (token.user) {
         session.user = token.user as CustomUser;
       }

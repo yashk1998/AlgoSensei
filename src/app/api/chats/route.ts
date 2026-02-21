@@ -1,20 +1,25 @@
-/**
- * @dev Chat management API endpoints
- * Features: user-specific chat history, MongoDB integration, authentication checks
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
-import clientPromise from '@/lib/mongodb';
 import { getServerSession } from 'next-auth';
-import { ObjectId } from 'mongodb';
 import { getSessionId } from '@/lib/session';
+import {
+  encodeEmail,
+  generateId,
+  uploadJson,
+  listJsonBlobs,
+} from '@/lib/azure-storage';
 
-/**
- * @dev GET handler for retrieving user's chat history
- * Returns sorted list of chats for authenticated user
- */
+interface StoredChat {
+  _id: string;
+  userEmail: string;
+  sessionId: string | null;
+  title: string;
+  messages: unknown[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export async function GET() {
   try {
     const session = await getServerSession();
@@ -22,13 +27,14 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const client = await clientPromise;
-    const chats = client.db().collection('chats');
-    
-    const userChats = await chats
-      .find({ userEmail: session.user.email })
-      .sort({ updatedAt: -1 })
-      .toArray();
+    const emailKey = encodeEmail(session.user.email);
+    const userChats = await listJsonBlobs<StoredChat>(`chats/${emailKey}/`);
+
+    // Sort by updatedAt descending (most recent first)
+    userChats.sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
 
     return NextResponse.json(userChats);
   } catch (error) {
@@ -36,10 +42,6 @@ export async function GET() {
   }
 }
 
-/**
- * @dev POST handler for creating new chat sessions
- * Creates chat with default title if none provided
- */
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession();
@@ -48,21 +50,24 @@ export async function POST(req: NextRequest) {
     }
 
     const { title } = await req.json();
-    const client = await clientPromise;
-    const chats = client.db().collection('chats');
     const sessionId = getSessionId();
+    const chatId = generateId();
+    const emailKey = encodeEmail(session.user.email);
+    const now = new Date().toISOString();
 
-    const newChat = {
+    const newChat: StoredChat = {
+      _id: chatId,
       userEmail: session.user.email,
       sessionId: sessionId || null,
       title: title || 'New Discussion',
       messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: now,
+      updatedAt: now,
     };
 
-    const result = await chats.insertOne(newChat);
-    return NextResponse.json({ ...newChat, _id: result.insertedId });
+    await uploadJson(`chats/${emailKey}/${chatId}.json`, newChat);
+
+    return NextResponse.json(newChat);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create chat' }, { status: 500 });
   }

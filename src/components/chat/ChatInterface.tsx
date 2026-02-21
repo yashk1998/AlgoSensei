@@ -147,6 +147,43 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  /* ----- File processing ----- */
+  const processFiles = useCallback(async (files: File[] | FileList) => {
+    const valid = Array.from(files).filter(
+      f => ACCEPTED_TYPES.includes(f.type) && f.size <= MAX_FILE_SIZE
+    );
+    const newAttachments: ImageAttachment[] = await Promise.all(
+      valid.map(async (file) => ({
+        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        base64: await fileToBase64(file),
+        name: file.name,
+        size: file.size,
+      }))
+    );
+    if (newAttachments.length > 0) {
+      setImageAttachments(prev => [...prev, ...newAttachments]);
+    }
+  }, []);
+
+  /* ----- Chat fetching ----- */
+  const fetchChat = useCallback(async (id: string) => {
+    setIsFetchingChat(true);
+    try {
+      const response = await fetch(`/api/chats/${id}`, { cache: 'no-store' });
+      if (response.ok) {
+        const chat = await response.json();
+        setCurrentChat(chat);
+        setMessages(chat.messages || []);
+      } else {
+        if (response.status === 404) router.push('/dashboard');
+      }
+    } catch {
+      router.push('/dashboard');
+    } finally {
+      setIsFetchingChat(false);
+    }
+  }, [router]);
+
   useEffect(() => {
     if (chatId) {
       fetchChat(chatId);
@@ -182,24 +219,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
     return () => document.removeEventListener('paste', handlePaste);
   }, [processFiles]);
 
-  /* ----- File processing ----- */
-  const processFiles = useCallback(async (files: File[] | FileList) => {
-    const valid = Array.from(files).filter(
-      f => ACCEPTED_TYPES.includes(f.type) && f.size <= MAX_FILE_SIZE
-    );
-    const newAttachments: ImageAttachment[] = await Promise.all(
-      valid.map(async (file) => ({
-        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-        base64: await fileToBase64(file),
-        name: file.name,
-        size: file.size,
-      }))
-    );
-    if (newAttachments.length > 0) {
-      setImageAttachments(prev => [...prev, ...newAttachments]);
-    }
-  }, []);
-
   /* ----- Drag & drop ----- */
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -218,25 +237,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sidebarCollapsed }) => {
       processFiles(e.dataTransfer.files);
     }
   }, [processFiles]);
-
-  /* ----- Chat fetching ----- */
-  const fetchChat = useCallback(async (id: string) => {
-    setIsFetchingChat(true);
-    try {
-      const response = await fetch(`/api/chats/${id}`, { cache: 'no-store' });
-      if (response.ok) {
-        const chat = await response.json();
-        setCurrentChat(chat);
-        setMessages(chat.messages || []);
-      } else {
-        if (response.status === 404) router.push('/dashboard');
-      }
-    } catch {
-      router.push('/dashboard');
-    } finally {
-      setIsFetchingChat(false);
-    }
-  }, [router]);
 
   const createNewChat = async () => {
     try {
